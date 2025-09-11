@@ -1,0 +1,31 @@
+{
+  "name": "calc-model",
+  "version": "1.0.0",
+  "description": "AI-powered natural language calculator using Brain.js",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "pnpm run build && node dist/predict.js",
+    "train": "pnpm run build && node dist/train.js",
+    "predict": "pnpm run build && node dist/predict.js",
+    "dev": "ts-node src/predict.ts",
+    "dev:train": "ts-node src/train.ts"
+  },
+  "keywords": [
+    "ai",
+    "calculator",
+    "machine-learning",
+    "brain.js",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "brain.js": "1.6.1"
+  }
+}
