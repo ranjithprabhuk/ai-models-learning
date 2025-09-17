@@ -1,0 +1,133 @@
+### DRAB API Testing
+# Use with VS Code REST Client extension
+
+@baseUrl = http://localhost:3000
+
+### Health Check
+GET {{baseUrl}}/query/health
+
+###
+
+### Get API Documentation
+GET {{baseUrl}}/
+
+###
+
+### Create Single Embedding
+POST {{baseUrl}}/embed
+Content-Type: application/json
+
+{
+  "text": "Photosynthesis is the process by which plants convert sunlight into energy",
+  "id": "doc_001",
+  "metadata": {
+    "source": "biology_textbook",
+    "chapter": 1,
+    "topic": "photosynthesis"
+  }
+}
+
+###
+
+### Create Another Embedding
+POST {{baseUrl}}/embed
+Content-Type: application/json
+
+{
+  "text": "Machine learning is a subset of artificial intelligence that focuses on algorithms",
+  "id": "doc_002",
+  "metadata": {
+    "source": "tech_book",
+    "chapter": 2,
+    "topic": "artificial_intelligence"
+  }
+}
+
+###
+
+### Create Batch Embeddings
+POST {{baseUrl}}/embed/batch
+Content-Type: application/json
+
+[
+  {
+    "text": "Deep learning uses neural networks with multiple layers",
+    "metadata": {"topic": "AI", "category": "technology"}
+  },
+  {
+    "text": "Chlorophyll is the green pigment in plants that captures light energy",
+    "metadata": {"topic": "biology", "category": "science"}
+  },
+  {
+    "text": "Natural language processing helps computers understand human language",
+    "metadata": {"topic": "NLP", "category": "technology"}
+  }
+]
+
+###
+
+### Search for Similar Texts
+POST {{baseUrl}}/query
+Content-Type: application/json
+
+{
+  "query": "How do plants make energy from sunlight?",
+  "limit": 5,
+  "threshold": 0.3
+}
+
+###
+
+### Search with AI Query
+POST {{baseUrl}}/query
+Content-Type: application/json
+
+{
+  "query": "artificial intelligence and machine learning algorithms",
+  "limit": 3,
+  "threshold": 0.5
+}
+
+###
+
+### Get Embedding by ID
+GET {{baseUrl}}/embed/doc_001
+
+###
+
+### Get Database Stats
+GET {{baseUrl}}/query/stats
+
+###
+
+### Find Similar to Stored Embedding
+POST {{baseUrl}}/query/similar/doc_001
+Content-Type: application/json
+
+{
+  "limit": 3,
+  "threshold": 0.4
+}
+
+###
+
+### Delete Embedding
+DELETE {{baseUrl}}/embed/doc_001
+
+###
+
+### Test Error Handling - Empty Text
+POST {{baseUrl}}/embed
+Content-Type: application/json
+
+{
+  "text": "",
+  "id": "test_error"
+}
+
+###
+
+### Test Error Handling - Invalid ID
+GET {{baseUrl}}/embed/nonexistent_id
+
+###
