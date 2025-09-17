@@ -4,6 +4,7 @@ import { EmbeddingService } from './services/embedding.service';
 import { VectorService } from './services/vector.service';
 import { embeddingRoutes } from './routes/embedding.routes';
 import { queryRoutes } from './routes/query.routes';
+import { chatRoutes } from './routes/chat.routes';
 
 const port = process.env.PORT || 3500;
 
@@ -60,6 +61,10 @@ const app = new Elysia()
           description: 'Vector search and similarity operations'
         },
         {
+          name: 'Chat',
+          description: 'Conversational AI with RAG (Retrieval-Augmented Generation)'
+        },
+        {
           name: 'Health',
           description: 'System health and monitoring'
         }
@@ -84,11 +89,17 @@ const app = new Elysia()
         'GET /query/stats': 'Get database statistics',
         'GET /query/health': 'Check service health status',
       },
+      chat: {
+        'POST /chat': 'Send a chat message and receive a streaming response with RAG context',
+        'GET /chat/conversations': 'Get list of recent conversations',
+        'DELETE /chat/conversations/:id': 'Delete a conversation and its history',
+      },
     },
     documentation: 'Send requests to the above endpoints to interact with the DRAB system',
   }))
   .use(embeddingRoutes)
   .use(queryRoutes)
+  .use(chatRoutes)
   .onError(({ code, error, set }) => {
     console.error(`Error ${code}:`, error);
     

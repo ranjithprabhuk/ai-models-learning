@@ -1,10 +1,11 @@
 import { pipeline, Pipeline } from '@xenova/transformers';
+import path from 'path';
 
 export class EmbeddingService {
   private static instance: EmbeddingService;
   private embedder: Pipeline | null = null;
   private modelName = 'sentence-transformers/all-MiniLM-L6-v2';
-  private localModelPath = './all-MiniLM-L6-v2';
+  private localModelPath = path.resolve(process.cwd(), 'all-MiniLM-L6-v2');
 
   private constructor() {}
 
@@ -17,25 +18,38 @@ export class EmbeddingService {
 
   /**
    * Initialize the embedding model
-   * For now, we'll use HuggingFace directly since local loading has path issues
-   * TODO: Fix local model loading in future iterations
+   * Uses local model for faster loading and offline capability
    */
   public async initialize(): Promise<void> {
     try {
       console.log('Initializing embedding model...');
 
-      // Disable SSL verification for development (not recommended for production)
-      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-
-      console.log('Loading model from HuggingFace (local model loading will be fixed in next iteration)...');
-      this.embedder = await pipeline('feature-extraction', this.modelName, {
-        quantized: false,
-      });
-      console.log('Successfully loaded model from HuggingFace');
+      // Try to load from local model first
+      console.log(`Attempting to load local model from: ${this.localModelPath}`);
+      
+      try {
+        this.embedder = await pipeline('feature-extraction', this.localModelPath, {
+          quantized: false,
+          local_files_only: true,
+        });
+        console.log('✅ Successfully loaded local model from', this.localModelPath);
+      } catch (localError) {
+        console.warn('⚠️ Failed to load local model, falling back to HuggingFace:', localError);
+        
+        // Fallback to HuggingFace if local model fails
+        // Disable SSL verification for development (not recommended for production)
+        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+        
+        console.log('Loading model from HuggingFace as fallback...');
+        this.embedder = await pipeline('feature-extraction', this.modelName, {
+          quantized: false,
+        });
+        console.log('✅ Successfully loaded model from HuggingFace (fallback)');
+      }
 
       console.log('Embedding model initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize embedding model:', error);
+      console.error('❌ Failed to initialize embedding model:', error);
       throw new Error(
         `Failed to initialize embedding model: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -120,11 +134,12 @@ export class EmbeddingService {
   /**
    * Get model information
    */
-  public getModelInfo(): { name: string; localPath: string; initialized: boolean } {
+  public getModelInfo(): { name: string; localPath: string; initialized: boolean; isLocal: boolean } {
     return {
       name: this.modelName,
       localPath: this.localModelPath,
       initialized: this.isInitialized(),
+      isLocal: true, // We prioritize local model loading
     };
   }
 }
